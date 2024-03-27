@@ -26,6 +26,7 @@ object Utils {
     const val DOZE_ENABLE = "doze_enable"
 
     const val CATEGORY_PICKUP_SENSOR = "pickup_sensor"
+    const val CATEGORY_AMD_SENSOR = "amd_sensor"
     const val CATEGORY_PROXIMITY_SENSOR = "proximity_sensor"
 
     const val GESTURE_PICK_UP_KEY = "gesture_pick_up_type"
@@ -91,6 +92,11 @@ object Utils {
     fun isPickUpSetToWake(context: Context): Boolean {
         return PreferenceManager.getDefaultSharedPreferences(context)
             .getString(GESTURE_PICK_UP_KEY, "0") == "2"
+    }
+
+    fun isSmartPickUpEnabled(context: Context): Boolean {
+        return PreferenceManager.getDefaultSharedPreferences(context)
+            .getString(GESTURE_PICK_UP_KEY, "0") == "3"
     }
 
     fun isPocketEnabled(context: Context): Boolean {

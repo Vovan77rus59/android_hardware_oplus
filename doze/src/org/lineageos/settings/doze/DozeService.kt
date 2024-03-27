@@ -15,6 +15,7 @@ import android.util.Log
 
 class DozeService : Service() {
     private lateinit var pickupSensor: PickupSensor
+    private lateinit var amdSensor: AmdSensor
     private lateinit var pocketSensor: PocketSensor
 
     private val screenStateReceiver = object : BroadcastReceiver() {
@@ -32,6 +33,12 @@ class DozeService : Service() {
             this,
             resources.getString(R.string.pickup_sensor_type),
             resources.getFloat(R.dimen.pickup_sensor_value),
+        )
+        amdSensor = AmdSensor(
+            this,
+            resources.getString(R.string.amd_sensor_type),
+            resources.getFloat(R.dimen.amd_sensor_value),
+            resources.getFloat(R.dimen.amd_sensor_value_calm),
         )
         pocketSensor = PocketSensor(
             this,
@@ -54,6 +61,7 @@ class DozeService : Service() {
 
         unregisterReceiver(screenStateReceiver)
         pickupSensor.disable()
+        amdSensor.disable()
         pocketSensor.disable()
     }
 
@@ -62,6 +70,9 @@ class DozeService : Service() {
     private fun onDisplayOn() {
         if (Utils.isPickUpEnabled(this)) {
             pickupSensor.disable()
+            if (Utils.isSmartPickUpEnabled(this)) {
+                amdSensor.disable()
+            }
         }
         if (Utils.isPocketEnabled(this)) {
             pocketSensor.disable()
@@ -71,6 +82,9 @@ class DozeService : Service() {
     private fun onDisplayOff() {
         if (Utils.isPickUpEnabled(this)) {
             pickupSensor.enable()
+            if (Utils.isSmartPickUpEnabled(this)) {
+                amdSensor.enable()
+            }
         }
         if (Utils.isPocketEnabled(this)) {
             pocketSensor.enable()

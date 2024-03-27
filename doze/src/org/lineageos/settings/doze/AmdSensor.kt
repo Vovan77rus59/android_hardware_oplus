@@ -16,8 +16,9 @@ import android.util.Log
 
 import java.util.concurrent.Executors
 
-class PickupSensor(
-    private val context: Context, sensorType: String, private val sensorValue: Float
+class AmdSensor(
+    private val context: Context, sensorType: String, private val sensorValue: Float,
+    private val sensorValueCalm: Float
 ) : SensorEventListener {
     private val powerManager = context.getSystemService(PowerManager::class.java)!!
     private val wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG)
@@ -32,18 +33,13 @@ class PickupSensor(
         if (DEBUG) Log.d(TAG, "Got sensor event: ${event.values[0]}")
         val delta = SystemClock.elapsedRealtime() - entryTimestamp
         if (delta < MIN_PULSE_INTERVAL_MS) {
-            return
+           return
         }
-        entryTimestamp = SystemClock.elapsedRealtime()
+        if (event.values[0] != sensorValueCalm) {
+           entryTimestamp = SystemClock.elapsedRealtime()
+        }
         if (event.values[0] == sensorValue) {
-            if (Utils.isSmartPickUpEnabled(context) || Utils.isPickUpSetToWake(context)) {
-                wakeLock.acquire(WAKELOCK_TIMEOUT_MS)
-                powerManager.wakeUpWithProximityCheck(
-                    SystemClock.uptimeMillis(), PowerManager.WAKE_REASON_GESTURE, TAG
-                )
-            } else {
-                Utils.launchDozePulse(context)
-            }
+           Utils.launchDozePulse(context)
         }
     }
 
@@ -70,10 +66,9 @@ class PickupSensor(
     }
 
     companion object {
-        private const val TAG = "PickupSensor"
+        private const val TAG = "AmdSensor"
         private const val DEBUG = false
 
         private const val MIN_PULSE_INTERVAL_MS = 2500L
-        private const val WAKELOCK_TIMEOUT_MS = 300L
     }
 }
